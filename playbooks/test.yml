@@ -4,7 +4,7 @@
   gather_facts: false
   tasks:
     - name: Fetch high-level cluster and node status
-      community.proxmox.proxmox_cluster_info:
+      community.proxmox.proxmox_cluster_status_info:
         # No API keys or tokens are defined here.
         # The module automatically reads the AAP environment injections:
         # PROXMOX_HOST, PROXMOX_USER, PROXMOX_TOKEN_ID, PROXMOX_TOKEN_SECRET, etc.
