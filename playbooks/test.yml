@@ -1,0 +1,28 @@
+---
+- name: Verify Proxmox API Authentication and Connectivity
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Fetch high-level cluster and node status
+      community.proxmox.proxmox_cluster_info:
+        # No API keys or tokens are defined here.
+        # The module automatically reads the AAP environment injections:
+        # PROXMOX_HOST, PROXMOX_USER, PROXMOX_TOKEN_ID, PROXMOX_TOKEN_SECRET, etc.
+      register: proxmox_connection_test
+      ignore_errors: true
+
+    - name: Fail intentionally with a helpful message if auth failed
+      ansible.builtin.fail:
+        msg: >
+          Authentication failed! Please verify that your AAP Credential Type
+          contains the correct Host, User realm (@pam/@pve), and API Token Secret.
+          Error Details: {{ proxmox_connection_test.msg | default('Unknown error') }}
+      when: proxmox_connection_test.failed
+
+    - name: Display connection success and cluster details
+      ansible.builtin.debug:
+        msg: >
+          Success! Connected to Proxmox successfully.
+          Your target cluster name is: "{{ proxmox_connection_test.cluster_info.name | default('Standalone Node') }}".
+          Discovered nodes: {{ proxmox_connection_test.cluster_info.nodes | default([]) | map(attribute='name') | list }}
+      when: not proxmox_connection_test.failed
